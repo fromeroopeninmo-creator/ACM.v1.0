@@ -20,6 +20,7 @@ const initialFormData: ACMFormData = {
   age: 0,
   condition: PropertyCondition.BUENO,
   locationQuality: LocationQuality.BUENA,
+  orientation?: Orientation;
   services: { luz: false, agua: false, gas: false, cloacas: false, pavimento: false },
   isRented: false,
   mainPhotoUrl: '',
