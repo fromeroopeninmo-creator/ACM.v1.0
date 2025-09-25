@@ -58,15 +58,16 @@ export default function ACMForm() {
     });
   };
 
-  const handleComparableChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewComparable({
-      ...newComparable,
-      [name]: name === "price" || name === "builtArea" || name === "daysPublished" || name === "coefficient"
-        ? Number(value)
-        : value,
-    });
-  };
+  const handleChange = (
+  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+) => {
+  const { name, value, type } = e.target;
+
+  setFormData({
+    ...formData,
+    [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+  });
+};
 
   const addComparable = () => {
     if (newComparable.builtArea > 0) {
