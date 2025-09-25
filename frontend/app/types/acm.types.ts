@@ -16,7 +16,7 @@ export enum PropertyCondition {
   MALO = "Malo",
 }
 
-// Orientación
+// Orientación de la propiedad
 export enum Orientation {
   NORTE = "Norte",
   SUR = "Sur",
@@ -39,7 +39,7 @@ export enum TitleType {
   POSESION = "Posesión",
 }
 
-// Servicios
+// Servicios básicos
 export interface Services {
   luz: boolean;
   agua: boolean;
@@ -52,14 +52,14 @@ export interface Services {
 export interface ComparableProperty {
   builtArea: number;      // m² cubiertos
   price: number;          // precio publicado
-  listingUrl: string;     // link de publicación / drive
+  listingUrl: string;     // link de publicación o drive
   description: string;    // descripción libre
   daysPublished: number;  // días publicada
   pricePerM2: number;     // calculado
   coefficient: number;    // coeficiente multiplicador (0.1 a 1)
 }
 
-// Formulario principal de ACM
+// Datos principales del formulario ACM
 export interface ACMFormData {
   clientName: string;
   advisorName: string;
@@ -69,21 +69,21 @@ export interface ACMFormData {
   neighborhood: string;
   locality: string;
   propertyType: PropertyType;
-  landArea: number;       // m² terreno
-  builtArea: number;      // m² cubiertos
+  landArea: number;        // m² terreno
+  builtArea: number;       // m² cubiertos
   hasPlans: boolean;
   titleType: TitleType;
   age: number;
   condition: PropertyCondition;
+  orientation: Orientation;
   locationQuality: LocationQuality;
-  orientation: Orientation;   // 👉 ya incluido
   services: Services;
   isRented: boolean;
-  mainPhotoUrl: string;   // link de foto
-  date: string;           // fecha ISO string
+  mainPhotoUrl: string;    // link de foto
+  date: string;            // fecha ISO
   comparables: ComparableProperty[];
 
-  // Texto libre para informe
+  // Texto libre para el informe
   observations: string;
   considerations: string;
   strengths: string;
