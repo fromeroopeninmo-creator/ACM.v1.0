@@ -16,6 +16,13 @@ export enum PropertyCondition {
   MALO = "Malo",
 }
 
+export enum Orientation {
+  NORTE = "Norte",
+  SUR = "Sur",
+  ESTE = "Este",
+  OESTE = "Oeste"
+}
+
 // Calidad de ubicación
 export enum LocationQuality {
   EXCELENTE = "Excelente",
