@@ -1,12 +1,3 @@
-// Servicios disponibles
-export interface Services {
-  luz: boolean;
-  agua: boolean;
-  gas: boolean;
-  cloacas: boolean;
-  pavimento: boolean;
-}
-
 // Tipología de propiedad
 export enum PropertyType {
   CASA = "Casa",
@@ -25,20 +16,20 @@ export enum PropertyCondition {
   MALO = "Malo",
 }
 
-// Orientación
-export enum Orientation {
-  NORTE = "Norte",
-  SUR = "Sur",
-  ESTE = "Este",
-  OESTE = "Oeste"
-}
-
 // Calidad de ubicación
 export enum LocationQuality {
   EXCELENTE = "Excelente",
   MUY_BUENA = "Muy buena",
   BUENA = "Buena",
   MALA = "Mala",
+}
+
+// Orientación
+export enum Orientation {
+  NORTE = "Norte",
+  SUR = "Sur",
+  ESTE = "Este",
+  OESTE = "Oeste",
 }
 
 // Tipo de título
@@ -48,18 +39,27 @@ export enum TitleType {
   POSESION = "Posesión",
 }
 
+// Servicios disponibles
+export interface Services {
+  luz: boolean;
+  agua: boolean;
+  gas: boolean;
+  cloacas: boolean;
+  pavimento: boolean;
+}
+
 // Propiedad comparable
 export interface ComparableProperty {
   builtArea: number;      // m² cubiertos
   price: number;          // precio publicado
-  listingUrl: string;     // link publicación / drive
-  description: string;    // texto libre
+  listingUrl: string;     // link de publicación o drive
+  description: string;    // descripción libre
   daysPublished: number;  // días publicada
-  pricePerM2: number;     // calculado
-  coefficient: number;    // coef (0.1 a 1)
+  pricePerM2: number;     // calculado automáticamente
+  coefficient: number;    // coeficiente multiplicador (0.1 a 1)
 }
 
-// Formulario principal ACM
+// Formulario principal de ACM
 export interface ACMFormData {
   clientName: string;
   advisorName: string;
@@ -68,23 +68,24 @@ export interface ACMFormData {
   address: string;
   neighborhood: string;
   locality: string;
+
   propertyType: PropertyType;
-  landArea: number;
-  builtArea: number;
-  hasPlans: boolean;
-  titleType: TitleType;
-  age: number;
-  condition: PropertyCondition;
-  locationQuality: LocationQuality;
-  orientation: Orientation;
-  services: Services;          // 👈 ESTE CAMPO ES CLAVE
-  isRented: boolean;
-  mainPhotoUrl: string;
-  mainPhotoBase64?: string;    // 👈 opcional
-  date: string;
+  landArea: number;       // m² terreno
+  builtArea: number;      // m² cubiertos
+  hasPlans: boolean;      // planos (sí/no)
+  titleType: TitleType;   // tipo de título
+  age: number;            // antigüedad
+  condition: PropertyCondition;   // estado de conservación
+  locationQuality: LocationQuality; // calidad de ubicación
+  orientation: Orientation;        // orientación
+  services: Services;              // checklist servicios
+  isRented: boolean;               // posee renta actualmente
+  mainPhotoUrl: string;            // link de foto
+  date: string;                    // fecha (ISO string)
+
   comparables: ComparableProperty[];
 
-  // Texto libre
+  // Texto libre para informe
   observations: string;
   considerations: string;
   strengths: string;
