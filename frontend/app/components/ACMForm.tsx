@@ -318,9 +318,3 @@ export default function ACMForm() {
     </div>
   );
 }
-
-        </div>
-      )}
-    </div>
-  );
-}
