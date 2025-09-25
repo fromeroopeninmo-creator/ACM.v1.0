@@ -17,11 +17,3 @@ export async function createACMAnalysis(data: ACMFormData) {
 
   return response.json();
 }
-
-  
-  if (!response.ok) {
-    throw new Error('Error al obtener el análisis');
-  }
-
-  return response.json();
-}
