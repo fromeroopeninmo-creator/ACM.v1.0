@@ -1,3 +1,5 @@
+// app/types/acm.types.ts
+
 // Tipología de propiedad
 export enum PropertyType {
   CASA = "Casa",
@@ -48,15 +50,17 @@ export interface Services {
   pavimento: boolean;
 }
 
-// Propiedad comparable
+// Propiedad comparable (hasta 4)
 export interface ComparableProperty {
   builtArea: number;      // m² cubiertos
-  price: number;          // precio publicado
-  listingUrl: string;     // link de publicación o drive
+  price: number;          // precio publicado (USD)
+  listingUrl: string;     // link de publicación / drive
   description: string;    // descripción libre
-  daysPublished: number;  // días publicada
-  pricePerM2: number;     // calculado
+  daysPublished: number;  // días que lleva publicada
+  pricePerM2: number;     // calculado: price / builtArea
   coefficient: number;    // coeficiente multiplicador (0.1 a 1)
+  photoUrl?: string;      // opción: link de foto
+  photoBase64?: string;   // si se sube archivo, lo guardamos como base64 para el PDF
 }
 
 // Datos principales del formulario ACM
@@ -71,17 +75,18 @@ export interface ACMFormData {
   propertyType: PropertyType;
   landArea: number;        // m² terreno
   builtArea: number;       // m² cubiertos
-  hasPlans: boolean;
-  titleType: TitleType;
-  age: number;
+  hasPlans: boolean;       // planos si/no
+  titleType: TitleType;    // escritura / boleto / posesion
+  age: number;             // antiguedad (años)
   condition: PropertyCondition;
-  orientation: Orientation;
   locationQuality: LocationQuality;
+  orientation: Orientation;
   services: Services;
-  isRented: boolean;
-  mainPhotoUrl: string;    // link de foto
-  date: string;            // fecha ISO
-  comparables: ComparableProperty[];
+  isRented: boolean;       // posee renta actualmente
+  mainPhotoUrl: string;    // opcional link de foto
+  mainPhotoBase64?: string;// base64 si se sube archivo
+  date: string;            // fecha ISO string (ej. "2025-09-25")
+  comparables: ComparableProperty[]; // hasta 4
 
   // Texto libre para el informe
   observations: string;
