@@ -1,15 +1,65 @@
-// app/types/acm.types.ts
-
-export interface ComparableProperty {
-  address: string;
-  photoUrl?: string;
-  listingUrl?: string;
-  builtArea: number;
-  price: number;
-  description?: string;
-  pricePerM2?: number;
+// Servicios disponibles
+export interface Services {
+  luz: boolean;
+  agua: boolean;
+  gas: boolean;
+  cloacas: boolean;
+  pavimento: boolean;
 }
 
+// Tipología de propiedad
+export enum PropertyType {
+  CASA = "Casa",
+  DEPARTAMENTO = "Departamento",
+  PH = "PH",
+  LOTE = "Lote",
+}
+
+// Estado de conservación
+export enum PropertyCondition {
+  ESTRENAR = "A estrenar",
+  EXCELENTE = "Excelente",
+  MUY_BUENO = "Muy bueno",
+  BUENO = "Bueno",
+  REGULAR = "Regular",
+  MALO = "Malo",
+}
+
+// Orientación
+export enum Orientation {
+  NORTE = "Norte",
+  SUR = "Sur",
+  ESTE = "Este",
+  OESTE = "Oeste"
+}
+
+// Calidad de ubicación
+export enum LocationQuality {
+  EXCELENTE = "Excelente",
+  MUY_BUENA = "Muy buena",
+  BUENA = "Buena",
+  MALA = "Mala",
+}
+
+// Tipo de título
+export enum TitleType {
+  ESCRITURA = "Escritura",
+  BOLETO = "Boleto",
+  POSESION = "Posesión",
+}
+
+// Propiedad comparable
+export interface ComparableProperty {
+  builtArea: number;      // m² cubiertos
+  price: number;          // precio publicado
+  listingUrl: string;     // link publicación / drive
+  description: string;    // texto libre
+  daysPublished: number;  // días publicada
+  pricePerM2: number;     // calculado
+  coefficient: number;    // coef (0.1 a 1)
+}
+
+// Formulario principal ACM
 export interface ACMFormData {
   clientName: string;
   advisorName: string;
@@ -19,64 +69,24 @@ export interface ACMFormData {
   neighborhood: string;
   locality: string;
   propertyType: PropertyType;
-  age: number;
   landArea: number;
   builtArea: number;
   hasPlans: boolean;
-  orientation: Orientation;
-  locationQuality: LocationQuality;
-  condition: PropertyCondition;
-  hasGas: boolean;
-  hasElectricity: boolean;
-  hasSewer: boolean;
-  hasWater: boolean;
   titleType: TitleType;
+  age: number;
+  condition: PropertyCondition;
+  locationQuality: LocationQuality;
+  orientation: Orientation;
+  services: Services;          // 👈 ESTE CAMPO ES CLAVE
   isRented: boolean;
-  mainPhotoUrl?: string;
+  mainPhotoUrl: string;
+  mainPhotoBase64?: string;    // 👈 opcional
+  date: string;
   comparables: ComparableProperty[];
-}
 
-export enum PropertyType {
-  CASA = 'CASA',
-  DEPARTAMENTO = 'DEPARTAMENTO',
-  PH = 'PH',
-  LOCAL = 'LOCAL',
-  OFICINA = 'OFICINA',
-  TERRENO = 'TERRENO',
-  GALPON = 'GALPON',
-  COCHERA = 'COCHERA'
-}
-
-export enum Orientation {
-  NORTE = 'NORTE',
-  SUR = 'SUR',
-  ESTE = 'ESTE',
-  OESTE = 'OESTE',
-  NORESTE = 'NORESTE',
-  NOROESTE = 'NOROESTE',
-  SURESTE = 'SURESTE',
-  SUROESTE = 'SUROESTE'
-}
-
-export enum LocationQuality {
-  EXCELENTE = 'EXCELENTE',
-  MUY_BUENA = 'MUY_BUENA',
-  BUENA = 'BUENA',
-  REGULAR = 'REGULAR',
-  MALA = 'MALA'
-}
-
-export enum PropertyCondition {
-  A_ESTRENAR = 'A_ESTRENAR',
-  EXCELENTE = 'EXCELENTE',
-  MUY_BUENO = 'MUY_BUENO',
-  BUENO = 'BUENO',
-  REGULAR = 'REGULAR',
-  A_REFACCIONAR = 'A_REFACCIONAR'
-}
-
-export enum TitleType {
-  ESCRITURA = 'ESCRITURA',
-  POSESION = 'POSESION',
-  BOLETO_COMPRAVENTA = 'BOLETO_COMPRAVENTA'
+  // Texto libre
+  observations: string;
+  considerations: string;
+  strengths: string;
+  weaknesses: string;
 }
