@@ -16,7 +16,7 @@ export enum PropertyCondition {
   MALO = "Malo",
 }
 
-// Orientacion
+// Orientación
 export enum Orientation {
   NORTE = "Norte",
   SUR = "Sur",
@@ -24,7 +24,7 @@ export enum Orientation {
   OESTE = "Oeste"
 }
 
-// Calidad 
+// Calidad de ubicación
 export enum LocationQuality {
   EXCELENTE = "Excelente",
   MUY_BUENA = "Muy buena",
@@ -69,13 +69,14 @@ export interface ACMFormData {
   neighborhood: string;
   locality: string;
   propertyType: PropertyType;
-  landArea: number;      // m² terreno
-  builtArea: number;     // m² cubiertos
+  landArea: number;       // m² terreno
+  builtArea: number;      // m² cubiertos
   hasPlans: boolean;
   titleType: TitleType;
   age: number;
   condition: PropertyCondition;
   locationQuality: LocationQuality;
+  orientation: Orientation; // 👉 agregado acá
   services: Services;
   isRented: boolean;
   mainPhotoUrl: string;   // link de foto
