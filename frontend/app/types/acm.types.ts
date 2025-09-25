@@ -21,7 +21,7 @@ export enum Orientation {
   NORTE = "Norte",
   SUR = "Sur",
   ESTE = "Este",
-  OESTE = "Oeste"
+  OESTE = "Oeste",
 }
 
 // Calidad de ubicación
@@ -76,7 +76,7 @@ export interface ACMFormData {
   age: number;
   condition: PropertyCondition;
   locationQuality: LocationQuality;
-  orientation: Orientation; // 👉 agregado acá
+  orientation: Orientation;   // 👉 ya incluido
   services: Services;
   isRented: boolean;
   mainPhotoUrl: string;   // link de foto
