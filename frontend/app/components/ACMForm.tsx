@@ -9,8 +9,8 @@ import {
   LocationQuality,
   PropertyCondition,
   TitleType,
-} from '@/app/types/acm.types';
-import { createACMAnalysis } from '@/app/lib/api';
+} from '../types/acm.types';
+import { createACMAnalysis } from '../lib/api';
 
 const initialFormData: ACMFormData = {
   clientName: '',
@@ -127,7 +127,7 @@ export default function ACMForm() {
     } finally {
       setIsSubmitting(false);
     }
-  }; // 👈 cerramos bien la función
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -313,6 +313,12 @@ export default function ACMForm() {
         <div className="mt-6 p-4 bg-red-100 rounded-lg">
           <h4 className="text-lg font-bold">Error:</h4>
           <p>{error}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
         </div>
       )}
     </div>
