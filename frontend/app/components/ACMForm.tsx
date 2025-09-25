@@ -67,17 +67,22 @@ export default function ACMForm() {
   };
 
   // ✅ Manejo comparables
-  const handleComparableChange = (
+  const handleComparableChange = <K extends keyof ComparableProperty>(
   index: number,
-  field: keyof ComparableProperty,
-  value: string | number
+  field: K,
+  value: ComparableProperty[K]
 ) => {
   const copy = [...formData.comparables];
 
-  if (field === "builtArea" || field === "price" || field === "daysPublished" || field === "coefficient") {
-    copy[index][field] = Number(value) || 0;
+  if (
+    field === "builtArea" ||
+    field === "price" ||
+    field === "daysPublished" ||
+    field === "coefficient"
+  ) {
+    copy[index][field] = Number(value) as ComparableProperty[K];
   } else {
-    copy[index][field] = value as any;
+    copy[index][field] = value;
   }
 
   // recalcular pricePerM2
@@ -86,6 +91,7 @@ export default function ACMForm() {
 
   setFormData({ ...formData, comparables: copy });
 };
+
   const addComparable = () => {
     if (formData.comparables.length < 4) {
       setFormData({
