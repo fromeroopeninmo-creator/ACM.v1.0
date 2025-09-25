@@ -17,6 +17,7 @@ export interface ACMFormData {
   email: string;
   address: string;
   neighborhood: string;
+  locality: string;
   propertyType: PropertyType;
   age: number;
   landArea: number;
