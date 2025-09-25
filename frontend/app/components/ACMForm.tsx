@@ -102,7 +102,6 @@ export default function ACMForm() {
     } finally {
       setIsSubmitting(false);
     }
-  };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
