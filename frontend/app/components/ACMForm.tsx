@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ACMFormData, ComparableProperty, PropertyType, LocationQuality, PropertyCondition, TitleType } from '@/app/types/acm.types';
+import { ACMFormData, ComparableProperty, PropertyType, Orientation, LocationQuality, PropertyCondition, TitleType } from '@/app/types/acm.types';
+
 import jsPDF from 'jspdf';
 
 const initialFormData: ACMFormData = {
