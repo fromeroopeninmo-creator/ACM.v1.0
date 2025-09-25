@@ -1,7 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { ACMFormData, ComparableProperty, PropertyType, Orientation, LocationQuality, PropertyCondition, TitleType } from '@/app/types/acm.types';
+import {
+  ACMFormData,
+  ComparableProperty,
+  PropertyType,
+  Orientation,
+  LocationQuality,
+  PropertyCondition,
+  TitleType,
+} from '@/app/types/acm.types';
 import { createACMAnalysis } from '@/app/lib/api';
 
 const initialFormData: ACMFormData = {
@@ -26,7 +34,7 @@ const initialFormData: ACMFormData = {
   titleType: TitleType.ESCRITURA,
   isRented: false,
   mainPhotoUrl: '',
-  comparables: []
+  comparables: [],
 };
 
 const initialComparable: ComparableProperty = {
@@ -35,34 +43,47 @@ const initialComparable: ComparableProperty = {
   listingUrl: '',
   builtArea: 0,
   price: 0,
-  description: ''
+  description: '',
 };
 
 export default function ACMForm() {
   const [formData, setFormData] = useState<ACMFormData>(initialFormData);
-  const [comparables, setComparables] = useState<ComparableProperty[]>([{ ...initialComparable }]);
+  const [comparables, setComparables] = useState<ComparableProperty[]>([
+    { ...initialComparable },
+  ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else if (type === 'number') {
-      setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
+      setFormData((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleComparableChange = (index: number, field: keyof ComparableProperty, value: any) => {
+  const handleComparableChange = (
+    index: number,
+    field: keyof ComparableProperty,
+    value: any
+  ) => {
     const updatedComparables = [...comparables];
     updatedComparables[index] = {
       ...updatedComparables[index],
-      [field]: field === 'builtArea' || field === 'price' ? parseFloat(value) || 0 : value
+      [field]:
+        field === 'builtArea' || field === 'price'
+          ? parseFloat(value) || 0
+          : value,
     };
     setComparables(updatedComparables);
   };
@@ -88,91 +109,212 @@ export default function ACMForm() {
     try {
       const dataToSubmit = {
         ...formData,
-        comparables: comparables.filter(c => c.address && c.price > 0 && c.builtArea > 0)
+        comparables: comparables.filter(
+          (c) => c.address && c.price > 0 && c.builtArea > 0
+        ),
       };
 
       const response = await createACMAnalysis(dataToSubmit);
       setResult(response);
-      
+
       // Reset form
       setFormData(initialFormData);
       setComparables([{ ...initialComparable }]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el análisis');
+      setError(
+        err instanceof Error ? err.message : 'Error al crear el análisis'
+      );
     } finally {
       setIsSubmitting(false);
     }
+  }; // 👈 cerramos bien la función
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <form onSubmit={handleSubmit} className="space-y-8 bg-white rounded-lg shadow-lg p-8">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Análisis Comparativo de Mercado (ACM)
-          </h2>
-        </div>
-
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-8 bg-white rounded-lg shadow-lg p-8"
+      >
         {/* Datos del Cliente */}
         <div className="border-b pb-8">
           <h3 className="text-xl font-semibold mb-6">Datos del Cliente</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre del Cliente *
-              </label>
-              <input
-                type="text"
-                name="clientName"
-                value={formData.clientName}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Asesor *
-              </label>
-              <input
-                type="text"
-                name="advisorName"
-                value={formData.advisorName}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Teléfono *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+            <input
+              type="text"
+              name="clientName"
+              value={formData.clientName}
+              onChange={handleInputChange}
+              required
+              placeholder="Nombre del Cliente"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="text"
+              name="advisorName"
+              value={formData.advisorName}
+              onChange={handleInputChange}
+              required
+              placeholder="Asesor"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              required
+              placeholder="Teléfono"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+              placeholder="Email"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
           </div>
         </div>
 
         {/* Datos de la Propiedad */}
         <div className="border-b pb-8">
+          <h3 className="text-xl font-semibold mb-6">Datos de la Propiedad</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              required
+              placeholder="Dirección"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="text"
+              name="neighborhood"
+              value={formData.neighborhood}
+              onChange={handleInputChange}
+              required
+              placeholder="Barrio"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+            <select
+              name="propertyType"
+              value={formData.propertyType}
+              onChange={handleInputChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            >
+              {Object.values(PropertyType).map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            <input
+              type="number"
+              name="age"
+              value={formData.age}
+              onChange={handleInputChange}
+              placeholder="Antigüedad"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+        </div>
+
+        {/* Comparables */}
+        <div className="border-b pb-8">
+          <h3 className="text-xl font-semibold mb-6">Propiedades Comparables</h3>
+          {comparables.map((comp, index) => (
+            <div
+              key={index}
+              className="p-4 mb-4 border rounded-lg bg-gray-50 space-y-4"
+            >
+              <input
+                type="text"
+                value={comp.address}
+                onChange={(e) =>
+                  handleComparableChange(index, 'address', e.target.value)
+                }
+                placeholder="Dirección"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+              <input
+                type="number"
+                value={comp.builtArea}
+                onChange={(e) =>
+                  handleComparableChange(index, 'builtArea', e.target.value)
+                }
+                placeholder="Metros cuadrados construidos"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+              <input
+                type="number"
+                value={comp.price}
+                onChange={(e) =>
+                  handleComparableChange(index, 'price', e.target.value)
+                }
+                placeholder="Precio"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+              <textarea
+                value={comp.description}
+                onChange={(e) =>
+                  handleComparableChange(index, 'description', e.target.value)
+                }
+                placeholder="Descripción"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              />
+              {comparables.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeComparable(index)}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                >
+                  Eliminar
+                </button>
+              )}
+            </div>
+          ))}
+          {comparables.length < 4 && (
+            <button
+              type="button"
+              onClick={addComparable}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              Agregar comparable
+            </button>
+          )}
+        </div>
+
+        {/* Botón de envío */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-3 bg-green-600 text-white rounded-lg disabled:opacity-50"
+          >
+            {isSubmitting ? 'Enviando...' : 'Crear Análisis'}
+          </button>
+        </div>
+      </form>
+
+      {/* Mostrar resultado o error */}
+      {result && (
+        <div className="mt-6 p-4 bg-green-100 rounded-lg">
+          <h4 className="text-lg font-bold">Análisis creado:</h4>
+          <pre className="whitespace-pre-wrap text-sm">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </div>
+      )}
+      {error && (
+        <div className="mt-6 p-4 bg-red-100 rounded-lg">
+          <h4 className="text-lg font-bold">Error:</h4>
+          <p>{error}</p>
+        </div>
+      )}
+    </div>
+  );
+}
