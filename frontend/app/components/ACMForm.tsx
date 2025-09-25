@@ -1,8 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { ACMFormData, ComparableProperty, PropertyType, Orientation, LocationQuality, PropertyCondition, TitleType } from '@/app/types/acm.types';
-
+import { 
+  ACMFormData, 
+  ComparableProperty, 
+  PropertyType, 
+  Orientation, 
+  LocationQuality, 
+  PropertyCondition, 
+  TitleType 
+} from '@/app/types/acm.types';
 import jsPDF from 'jspdf';
 
 const initialFormData: ACMFormData = {
@@ -21,7 +28,7 @@ const initialFormData: ACMFormData = {
   age: 0,
   condition: PropertyCondition.BUENO,
   locationQuality: LocationQuality.BUENA,
-  orientation?: Orientation;
+  orientation: Orientation.NORTE, // 👉 agregado
   services: { luz: false, agua: false, gas: false, cloacas: false, pavimento: false },
   isRented: false,
   mainPhotoUrl: '',
@@ -40,25 +47,8 @@ const initialComparable: ComparableProperty = {
   description: '',
   daysPublished: 0,
   pricePerM2: 0,
-  coefficient: 1,
-  photoUrl: ''
+  coefficient: 1
 };
-
-// 👉 helper: cargar imagen como base64
-async function loadImageAsBase64(url: string): Promise<string | null> {
-  try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return null;
-  }
-}
 
 export default function ACMForm() {
   const [formData, setFormData] = useState<ACMFormData>(initialFormData);
@@ -94,8 +84,8 @@ export default function ACMForm() {
     if (comparables.length > 1) setComparables(comparables.filter((_, i) => i !== index));
   };
 
-  // 👉 Generar PDF con fotos
-  const generatePDF = async () => {
+  // 👉 Generar PDF
+  const generatePDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(14);
     doc.text("Informe ACM - Análisis Comparativo de Mercado", 10, 10);
@@ -110,54 +100,16 @@ export default function ACMForm() {
     doc.text(`Tipología: ${formData.propertyType} | Antigüedad: ${formData.age} años`, 10, 68);
     doc.text(`Terreno: ${formData.landArea} m² | Cubiertos: ${formData.builtArea} m²`, 10, 76);
     doc.text(`Estado: ${formData.condition} | Ubicación: ${formData.locationQuality}`, 10, 84);
+    doc.text(`Orientación: ${formData.orientation}`, 10, 92);
 
-    // 👉 foto principal
-    if (formData.mainPhotoUrl) {
-      const img = await loadImageAsBase64(formData.mainPhotoUrl);
-      if (img) doc.addImage(img, "JPEG", 140, 20, 60, 45);
-    }
-
-    doc.text("Servicios:", 10, 100);
+    doc.text("Servicios:", 10, 108);
     const services = Object.entries(formData.services).filter(([_, v]) => v).map(([k]) => k).join(", ") || "Ninguno";
-    doc.text(services, 10, 108);
+    doc.text(services, 10, 116);
 
-    doc.text("Propiedades comparables:", 10, 124);
-    let y = 132;
-    for (let i = 0; i < comparables.length; i++) {
-      const c = comparables[i];
-      doc.text(`${i + 1}. ${c.builtArea} m² - USD ${c.price} (${c.pricePerM2.toFixed(2)} USD/m²) - Coef: ${c.coefficient}`, 10, y);
-      y += 8;
-      if (c.listingUrl) {
-        doc.text(`Link: ${c.listingUrl}`, 10, y);
-        y += 8;
-      }
-      if (c.description) {
-        doc.text(c.description, 10, y, { maxWidth: 120 });
-        y += 12;
-      }
-      // 👉 foto comparable
-      if (c.photoUrl) {
-        const img = await loadImageAsBase64(c.photoUrl);
-        if (img) {
-          doc.addImage(img, "JPEG", 140, y - 20, 60, 45);
-          y += 50;
-        }
-      }
-      y += 10;
-    }
-
-    doc.addPage();
-    doc.text("Observaciones:", 10, 20);
-    doc.text(formData.observations || "-", 10, 28, { maxWidth: 180 });
-
-    doc.text("A considerar:", 10, 60);
-    doc.text(formData.considerations || "-", 10, 68, { maxWidth: 180 });
-
-    doc.text("Fortalezas:", 10, 100);
-    doc.text(formData.strengths || "-", 10, 108, { maxWidth: 180 });
-
-    doc.text("Debilidades:", 10, 140);
-    doc.text(formData.weaknesses || "-", 10, 148, { maxWidth: 180 });
+    doc.text("Propiedades comparables:", 10, 132);
+    comparables.forEach((c, i) => {
+      doc.text(`${i + 1}. ${c.builtArea} m² - USD ${c.price} (${c.pricePerM2.toFixed(2)} USD/m²) - Coef: ${c.coefficient}`, 10, 140 + i * 12);
+    });
 
     doc.save("informe-acm.pdf");
   };
@@ -176,10 +128,20 @@ export default function ACMForm() {
           <input name="email" placeholder="Email" type="email" value={formData.email} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
         </div>
 
-        {/* Foto principal */}
+        {/* Datos de la Propiedad */}
         <div>
-          <h3 className="font-semibold mb-2">Foto Principal</h3>
-          <input name="mainPhotoUrl" placeholder="URL de la foto principal" value={formData.mainPhotoUrl} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
+          <h3 className="font-semibold mb-4">Datos de la Propiedad</h3>
+          <input name="address" placeholder="Dirección" value={formData.address} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
+          <input name="neighborhood" placeholder="Barrio" value={formData.neighborhood} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
+          <input name="locality" placeholder="Localidad" value={formData.locality} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
+          <input name="landArea" placeholder="m² Terreno" type="number" value={formData.landArea} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
+          <input name="builtArea" placeholder="m² Cubiertos" type="number" value={formData.builtArea} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
+          <select name="orientation" value={formData.orientation} onChange={handleInputChange} className="border p-2 w-full mb-2">
+            <option value={Orientation.NORTE}>Norte</option>
+            <option value={Orientation.SUR}>Sur</option>
+            <option value={Orientation.ESTE}>Este</option>
+            <option value={Orientation.OESTE}>Oeste</option>
+          </select>
         </div>
 
         {/* Comparables */}
@@ -193,7 +155,6 @@ export default function ACMForm() {
               <textarea placeholder="Descripción" value={c.description} onChange={e => handleComparableChange(i, "description", e.target.value)} className="border p-2 w-full mb-2"/>
               <input placeholder="Días publicada" type="number" value={c.daysPublished} onChange={e => handleComparableChange(i, "daysPublished", e.target.value)} className="border p-2 w-full mb-2"/>
               <input placeholder="Coeficiente (0.1 - 1)" type="number" step="0.1" min="0.1" max="1" value={c.coefficient} onChange={e => handleComparableChange(i, "coefficient", e.target.value)} className="border p-2 w-full mb-2"/>
-              <input placeholder="URL de foto" value={c.photoUrl} onChange={e => handleComparableChange(i, "photoUrl", e.target.value)} className="border p-2 w-full mb-2"/>
               <button type="button" onClick={() => removeComparable(i)} className="bg-red-500 text-white px-3 py-1 rounded">Eliminar</button>
             </div>
           ))}
