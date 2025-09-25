@@ -28,6 +28,7 @@ export default function ACMForm() {
     age: 0,
     condition: PropertyCondition.BUENO,
     locationQuality: LocationQuality.BUENA,
+    orientation: Orientation.NORTE,
     services: { luz: false, agua: false, gas: false, cloacas: false, pavimento: false },
     isRented: false,
     mainPhotoUrl: "",
