@@ -1,180 +1,197 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  ACMFormData, 
-  ComparableProperty, 
-  PropertyType, 
-  Orientation, 
-  LocationQuality, 
-  PropertyCondition, 
-  TitleType 
-} from '@/app/types/acm.types';
-import jsPDF from 'jspdf';
-
-const initialFormData: ACMFormData = {
-  clientName: '',
-  advisorName: '',
-  phone: '',
-  email: '',
-  address: '',
-  neighborhood: '',
-  locality: '',
-  propertyType: PropertyType.CASA,
-  landArea: 0,
-  builtArea: 0,
-  hasPlans: false,
-  titleType: TitleType.ESCRITURA,
-  age: 0,
-  condition: PropertyCondition.BUENO,
-  locationQuality: LocationQuality.BUENA,
-  orientation: Orientation.NORTE, // 👉 agregado
-  services: { luz: false, agua: false, gas: false, cloacas: false, pavimento: false },
-  isRented: false,
-  mainPhotoUrl: '',
-  date: new Date().toISOString().split("T")[0],
-  comparables: [],
-  observations: '',
-  considerations: '',
-  strengths: '',
-  weaknesses: ''
-};
-
-const initialComparable: ComparableProperty = {
-  builtArea: 0,
-  price: 0,
-  listingUrl: '',
-  description: '',
-  daysPublished: 0,
-  pricePerM2: 0,
-  coefficient: 1
-};
+import React, { useState } from "react";
+import {
+  ACMFormData,
+  ComparableProperty,
+  PropertyType,
+  Orientation,
+  LocationQuality,
+  PropertyCondition,
+  TitleType,
+} from "@/app/types/acm.types";
 
 export default function ACMForm() {
-  const [formData, setFormData] = useState<ACMFormData>(initialFormData);
-  const [comparables, setComparables] = useState<ComparableProperty[]>([{ ...initialComparable }]);
+  const [formData, setFormData] = useState<ACMFormData>({
+    clientName: "",
+    advisorName: "",
+    phone: "",
+    email: "",
+    address: "",
+    neighborhood: "",
+    locality: "",
+    propertyType: PropertyType.CASA,
+    landArea: 0,
+    builtArea: 0,
+    hasPlans: false,
+    titleType: TitleType.ESCRITURA,
+    age: 0,
+    condition: PropertyCondition.BUENO,
+    locationQuality: LocationQuality.BUENA,
+    services: { luz: false, agua: false, gas: false, cloacas: false, pavimento: false },
+    isRented: false,
+    mainPhotoUrl: "",
+    date: new Date().toISOString().split("T")[0],
+    comparables: [],
+    observations: "",
+    considerations: "",
+    strengths: "",
+    weaknesses: "",
+  });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    if (type === 'checkbox') {
-      setFormData(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+  const [newComparable, setNewComparable] = useState<ComparableProperty>({
+    builtArea: 0,
+    price: 0,
+    listingUrl: "",
+    description: "",
+    daysPublished: 0,
+    pricePerM2: 0,
+    coefficient: 1,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  const handleComparableChange = (index: number, field: keyof ComparableProperty, value: any) => {
-    const updated = [...comparables];
-    updated[index] = {
-      ...updated[index],
-      [field]: field === 'price' || field === 'builtArea' || field === 'daysPublished' || field === 'coefficient'
-        ? parseFloat(value) || 0
-        : value
-    };
-    updated[index].pricePerM2 = updated[index].builtArea > 0 ? updated[index].price / updated[index].builtArea : 0;
-    setComparables(updated);
-    setFormData(prev => ({ ...prev, comparables: updated }));
+  const handleComparableChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setNewComparable({
+      ...newComparable,
+      [name]: name === "price" || name === "builtArea" || name === "daysPublished" || name === "coefficient"
+        ? Number(value)
+        : value,
+    });
   };
 
   const addComparable = () => {
-    if (comparables.length < 4) setComparables([...comparables, { ...initialComparable }]);
+    if (newComparable.builtArea > 0) {
+      setFormData({
+        ...formData,
+        comparables: [...formData.comparables, { ...newComparable, pricePerM2: newComparable.price / newComparable.builtArea }],
+      });
+      setNewComparable({
+        builtArea: 0,
+        price: 0,
+        listingUrl: "",
+        description: "",
+        daysPublished: 0,
+        pricePerM2: 0,
+        coefficient: 1,
+      });
+    }
   };
 
-  const removeComparable = (index: number) => {
-    if (comparables.length > 1) setComparables(comparables.filter((_, i) => i !== index));
-  };
-
-  // 👉 Generar PDF
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text("Informe ACM - Análisis Comparativo de Mercado", 10, 10);
-
-    doc.setFontSize(12);
-    doc.text(`Cliente: ${formData.clientName}`, 10, 20);
-    doc.text(`Asesor: ${formData.advisorName}`, 10, 28);
-    doc.text(`Teléfono: ${formData.phone}`, 10, 36);
-    doc.text(`Email: ${formData.email}`, 10, 44);
-
-    doc.text(`Dirección: ${formData.address}, Barrio: ${formData.neighborhood}, Localidad: ${formData.locality}`, 10, 60);
-    doc.text(`Tipología: ${formData.propertyType} | Antigüedad: ${formData.age} años`, 10, 68);
-    doc.text(`Terreno: ${formData.landArea} m² | Cubiertos: ${formData.builtArea} m²`, 10, 76);
-    doc.text(`Estado: ${formData.condition} | Ubicación: ${formData.locationQuality}`, 10, 84);
-    doc.text(`Orientación: ${formData.orientation}`, 10, 92);
-
-    doc.text("Servicios:", 10, 108);
-    const services = Object.entries(formData.services).filter(([_, v]) => v).map(([k]) => k).join(", ") || "Ninguno";
-    doc.text(services, 10, 116);
-
-    doc.text("Propiedades comparables:", 10, 132);
-    comparables.forEach((c, i) => {
-      doc.text(`${i + 1}. ${c.builtArea} m² - USD ${c.price} (${c.pricePerM2.toFixed(2)} USD/m²) - Coef: ${c.coefficient}`, 10, 140 + i * 12);
-    });
-
-    doc.save("informe-acm.pdf");
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Datos del ACM:", formData);
+    alert("Formulario enviado. (Aquí conectaremos con el backend o generaremos PDF)");
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <form className="space-y-6 bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold mb-6">Análisis Comparativo de Mercado (ACM)</h2>
+    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <h2 className="text-xl font-bold">Datos de la Propiedad</h2>
 
-        {/* Datos del Cliente */}
-        <div>
-          <h3 className="font-semibold mb-4">Datos del Cliente</h3>
-          <input name="clientName" placeholder="Nombre del Cliente" value={formData.clientName} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="advisorName" placeholder="Asesor" value={formData.advisorName} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="phone" placeholder="Teléfono" value={formData.phone} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="email" placeholder="Email" type="email" value={formData.email} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-        </div>
+      <input type="text" name="clientName" placeholder="Cliente" value={formData.clientName} onChange={handleChange} className="border p-2 w-full" />
+      <input type="text" name="advisorName" placeholder="Agente" value={formData.advisorName} onChange={handleChange} className="border p-2 w-full" />
+      <input type="text" name="phone" placeholder="Teléfono" value={formData.phone} onChange={handleChange} className="border p-2 w-full" />
+      <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border p-2 w-full" />
+      <input type="text" name="address" placeholder="Dirección" value={formData.address} onChange={handleChange} className="border p-2 w-full" />
+      <input type="text" name="neighborhood" placeholder="Barrio" value={formData.neighborhood} onChange={handleChange} className="border p-2 w-full" />
+      <input type="text" name="locality" placeholder="Localidad" value={formData.locality} onChange={handleChange} className="border p-2 w-full" />
 
-        {/* Datos de la Propiedad */}
-        <div>
-          <h3 className="font-semibold mb-4">Datos de la Propiedad</h3>
-          <input name="address" placeholder="Dirección" value={formData.address} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="neighborhood" placeholder="Barrio" value={formData.neighborhood} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="locality" placeholder="Localidad" value={formData.locality} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="landArea" placeholder="m² Terreno" type="number" value={formData.landArea} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <input name="builtArea" placeholder="m² Cubiertos" type="number" value={formData.builtArea} onChange={handleInputChange} className="border p-2 w-full mb-2"/>
-          <select name="orientation" value={formData.orientation} onChange={handleInputChange} className="border p-2 w-full mb-2">
-            <option value={Orientation.NORTE}>Norte</option>
-            <option value={Orientation.SUR}>Sur</option>
-            <option value={Orientation.ESTE}>Este</option>
-            <option value={Orientation.OESTE}>Oeste</option>
-          </select>
-        </div>
+      <select name="propertyType" value={formData.propertyType} onChange={handleChange} className="border p-2 w-full">
+        {Object.values(PropertyType).map((type) => (
+          <option key={type} value={type}>{type}</option>
+        ))}
+      </select>
 
-        {/* Comparables */}
-        <div>
-          <h3 className="font-semibold mb-4">Propiedades Comparables</h3>
-          {comparables.map((c, i) => (
-            <div key={i} className="border p-4 mb-4 rounded">
-              <input placeholder="m² Cubiertos" type="number" value={c.builtArea} onChange={e => handleComparableChange(i, "builtArea", e.target.value)} className="border p-2 w-full mb-2"/>
-              <input placeholder="Precio (USD)" type="number" value={c.price} onChange={e => handleComparableChange(i, "price", e.target.value)} className="border p-2 w-full mb-2"/>
-              <input placeholder="Link publicación" value={c.listingUrl} onChange={e => handleComparableChange(i, "listingUrl", e.target.value)} className="border p-2 w-full mb-2"/>
-              <textarea placeholder="Descripción" value={c.description} onChange={e => handleComparableChange(i, "description", e.target.value)} className="border p-2 w-full mb-2"/>
-              <input placeholder="Días publicada" type="number" value={c.daysPublished} onChange={e => handleComparableChange(i, "daysPublished", e.target.value)} className="border p-2 w-full mb-2"/>
-              <input placeholder="Coeficiente (0.1 - 1)" type="number" step="0.1" min="0.1" max="1" value={c.coefficient} onChange={e => handleComparableChange(i, "coefficient", e.target.value)} className="border p-2 w-full mb-2"/>
-              <button type="button" onClick={() => removeComparable(i)} className="bg-red-500 text-white px-3 py-1 rounded">Eliminar</button>
-            </div>
-          ))}
-          <button type="button" onClick={addComparable} className="bg-blue-500 text-white px-4 py-2 rounded">Agregar Propiedad</button>
-        </div>
+      <input type="number" name="landArea" placeholder="m² Terreno" value={formData.landArea} onChange={handleChange} className="border p-2 w-full" />
+      <input type="number" name="builtArea" placeholder="m² Cubiertos" value={formData.builtArea} onChange={handleChange} className="border p-2 w-full" />
 
-        {/* Observaciones */}
-        <div>
-          <h3 className="font-semibold mb-4">Comentarios</h3>
-          <textarea placeholder="Observaciones" value={formData.observations} onChange={e => setFormData({...formData, observations: e.target.value})} className="border p-2 w-full mb-2"/>
-          <textarea placeholder="A considerar" value={formData.considerations} onChange={e => setFormData({...formData, considerations: e.target.value})} className="border p-2 w-full mb-2"/>
-          <textarea placeholder="Fortalezas" value={formData.strengths} onChange={e => setFormData({...formData, strengths: e.target.value})} className="border p-2 w-full mb-2"/>
-          <textarea placeholder="Debilidades" value={formData.weaknesses} onChange={e => setFormData({...formData, weaknesses: e.target.value})} className="border p-2 w-full mb-2"/>
-        </div>
+      <label>
+        <input type="checkbox" name="hasPlans" checked={formData.hasPlans} onChange={handleChange} /> Planos
+      </label>
 
-        {/* Botón PDF */}
-        <button type="button" onClick={generatePDF} className="bg-green-600 text-white px-6 py-2 rounded">
-          Descargar Informe en PDF
-        </button>
-      </form>
-    </div>
+      <select name="titleType" value={formData.titleType} onChange={handleChange} className="border p-2 w-full">
+        {Object.values(TitleType).map((title) => (
+          <option key={title} value={title}>{title}</option>
+        ))}
+      </select>
+
+      <input type="number" name="age" placeholder="Antigüedad (años)" value={formData.age} onChange={handleChange} className="border p-2 w-full" />
+
+      <select name="condition" value={formData.condition} onChange={handleChange} className="border p-2 w-full">
+        {Object.values(PropertyCondition).map((c) => (
+          <option key={c} value={c}>{c}</option>
+        ))}
+      </select>
+
+      <select name="locationQuality" value={formData.locationQuality} onChange={handleChange} className="border p-2 w-full">
+        {Object.values(LocationQuality).map((q) => (
+          <option key={q} value={q}>{q}</option>
+        ))}
+      </select>
+
+      <h3 className="font-bold">Servicios</h3>
+      {Object.keys(formData.services).map((service) => (
+        <label key={service} className="block">
+          <input
+            type="checkbox"
+            checked={formData.services[service as keyof typeof formData.services]}
+            onChange={() =>
+              setFormData({
+                ...formData,
+                services: { ...formData.services, [service]: !formData.services[service as keyof typeof formData.services] },
+              })
+            }
+          />{" "}
+          {service}
+        </label>
+      ))}
+
+      <label>
+        <input type="checkbox" name="isRented" checked={formData.isRented} onChange={handleChange} /> Posee renta
+      </label>
+
+      <input type="text" name="mainPhotoUrl" placeholder="URL de foto" value={formData.mainPhotoUrl} onChange={handleChange} className="border p-2 w-full" />
+      <input type="date" name="date" value={formData.date} onChange={handleChange} className="border p-2 w-full" />
+
+      <h2 className="text-xl font-bold mt-6">Propiedades Comparadas</h2>
+
+      <input type="number" name="builtArea" placeholder="m² Cubiertos" value={newComparable.builtArea} onChange={handleComparableChange} className="border p-2 w-full" />
+      <input type="number" name="price" placeholder="Precio" value={newComparable.price} onChange={handleComparableChange} className="border p-2 w-full" />
+      <input type="text" name="listingUrl" placeholder="URL publicación/drive" value={newComparable.listingUrl} onChange={handleComparableChange} className="border p-2 w-full" />
+      <textarea name="description" placeholder="Descripción" value={newComparable.description} onChange={handleComparableChange} className="border p-2 w-full" />
+      <input type="number" name="daysPublished" placeholder="Días publicada" value={newComparable.daysPublished} onChange={handleComparableChange} className="border p-2 w-full" />
+      <input type="number" name="coefficient" step="0.1" min="0.1" max="1" placeholder="Coeficiente (0.1 a 1)" value={newComparable.coefficient} onChange={handleComparableChange} className="border p-2 w-full" />
+
+      <button type="button" onClick={addComparable} className="bg-blue-500 text-white px-4 py-2">Agregar comparable</button>
+
+      <div>
+        <h3 className="font-bold">Observaciones</h3>
+        <textarea name="observations" value={formData.observations} onChange={handleChange} className="border p-2 w-full" />
+      </div>
+
+      <div>
+        <h3 className="font-bold">A considerar</h3>
+        <textarea name="considerations" value={formData.considerations} onChange={handleChange} className="border p-2 w-full" />
+      </div>
+
+      <div>
+        <h3 className="font-bold">Fortalezas</h3>
+        <textarea name="strengths" value={formData.strengths} onChange={handleChange} className="border p-2 w-full" />
+      </div>
+
+      <div>
+        <h3 className="font-bold">Debilidades</h3>
+        <textarea name="weaknesses" value={formData.weaknesses} onChange={handleChange} className="border p-2 w-full" />
+      </div>
+
+      <button type="submit" className="bg-green-600 text-white px-6 py-2 mt-4">Generar Informe</button>
+    </form>
   );
 }
